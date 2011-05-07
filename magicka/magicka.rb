@@ -11,7 +11,7 @@ ARGF.each do |input|
   combo_map = {}
   combos = split_input[0].sub(/\d+/, '').strip
   # splits the combos up into two chars and the result
-  combos = combos.split(/(\w{3})/).reject{|x| x.empty?}
+  combos = combos.split(/(\w{3})/).collect{|x| x.strip}.reject{|x| x.empty?}
   combos.each do |combo|
     a = combo[0].chr
     b = combo[1].chr
@@ -23,7 +23,7 @@ ARGF.each do |input|
 
   opposite_map = {}
   opposites = split_input[1].sub(/\d+/, '').strip
-  opposites = opposites.split(/(\w{2})/).reject{|x| x.empty?}
+  opposites = opposites.split(/(\w{2})/).collect{|x| x.strip}.reject{|x| x.empty?}
   opposites.each do |opposite|
     a = opposite[0].chr
     b = opposite[1].chr
