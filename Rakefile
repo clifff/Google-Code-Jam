@@ -52,8 +52,6 @@ task :test do
     cmd = "ruby #{prog} #{input_name}"
     result = `#{cmd}`
     if result != reference_output
-      Dir.mkdir("/tmp/works") if not Dir.exists?("/tmp/works")
-      Dir.mkdir("/tmp/fails") if not Dir.exists?("/tmp/fails")
       File.open("/tmp/#{output_name}", 'w'){ |f| f.write(result)}
       print `diff /tmp/#{output_name} #{output_name}`
     else
