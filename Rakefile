@@ -11,6 +11,7 @@ task :test do
   # Determine the program filename
   files = Dir.entries(pwd)
   files = files.delete_if{|x| (x == '.' || x == '..') }
+  files.delete_if{|x| x == "test.rb"}
   prog = files.find{|x| x.index(/.rb$/) }
 
   files = Dir.glob("works/*")
