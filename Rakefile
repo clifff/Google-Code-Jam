@@ -3,41 +3,43 @@ task :default => 'test'
 # Assumes that if you have somethign like sample.in && sample.out or B-small-attempt0.in && B-small-attempt1.out, they are a valid pair
 desc 'Tests your program!'
 task :test do
+  pwd = Rake.original_dir
+  Dir.chdir(pwd)
   valid_tests = {}
   invalid_tests = {}
 
   # Determine the program filename
-  files = Dir.entries(Dir.pwd)
+  files = Dir.entries(pwd)
   files = files.delete_if{|x| (x == '.' || x == '..') }
   prog = files.find{|x| x.index(/.rb$/) }
 
-  Dir.chdir(Dir.pwd + "/works")
-  files = Dir.entries(Dir.pwd)
+  files = Dir.glob("works/*")
   files = files.delete_if{|x| (x == '.' || x == '..') }
 
   # Look for the working files and add it to the map
-  inputs = files.select{ |x| x.index(/.in/) }
+  inputs = files.select{ |x| x.index(/.in$/) }
   inputs.each do |input|
     output = input.sub(".in", ".out")
     if files.include?(output)
-      valid_tests["works/" + input] = "works/" + output
+      valid_tests[input] = output
     end
   end
 
-  Dir.chdir(Dir.pwd + "/../fails")
-  files = Dir.entries(Dir.pwd)
+  files = Dir.glob("fails/*")
   files = files.delete_if{|x| (x == '.' || x == '..') }
-  Dir.chdir("../")
 
   # Look for the failing files and add it to the map
-  inputs = files.select{ |x| x.index(/\d+.in/) }
+  inputs = files.select{ |x| x.index(/\d+.in$/) }
   inputs.each do |input|
     output = input.sub(".in", ".out")
     if files.include?(output)
-      invalid_tests["fails/" + input] = "fails/" + output
+      invalid_tests[input] = output
     end
   end
-
+  
+  ["/tmp/works", "/tmp/fails"].each do |dir|
+    Dir.mkdir(dir) unless Dir.exists?(dir)
+  end
 
   valid_tests.each do |input_name, output_name|
     # Read the output of the file
@@ -80,9 +82,20 @@ task :test do
 
 end
 
-desc "If it doesn't already exist, creates a barebone file for you to start with"
-task :setup do
-  filename = Dir.pwd.split("/").last + ".rb"
+desc "Takes one argument, creates a new folder for that problem w/ starting .rb file and test folders"
+task :create do
+  puts ARGV.inspect
+  dir = ARGV[1]
+  raise 'Error: must provide a problem to create!' unless dir
+
+  if Dir.exists?(dir)
+    puts "Directory #{dir} already exists"
+  else
+    Dir.mkdir(dir)
+    puts "Created #{dir}"
+  end
+
+  filename = dir + "/" + dir + ".rb"
 
   if File.exists?(filename)
     puts "#{filename} already exists!"
@@ -98,11 +111,11 @@ END
     puts "Created #{filename}"
   end
 
-  ["/works", "/fails"].each do |dir|
-    if Dir.exists?(pwd + dir)
+  ["/works", "/fails"].each do |sub_dir|
+    if Dir.exists?(dir + sub_dir)
       puts "Directory #{dir} already exists."
     else
-      Dir.mkdir(pwd + dir)
+      Dir.mkdir(dir + sub_dir)
       puts "Created #{dir}"
     end
   end
